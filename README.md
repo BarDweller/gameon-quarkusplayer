@@ -30,7 +30,7 @@ This app requires the following env vars to be set.
 |JWT_PUBLIC_CERT| The pem certificate as a multiline env var (eg, ----BEGIN CERTIFICATE--- etc.. etc etc) |
 |COUCHDB_USER| userid to talk to couchdb |
 |COUCHDB_PASSWORD| password to talk to couchdb |
-|COUCHDB_URL|url to talk to couchdb|
+|COUCHDB_SERVICE_URL|url to talk to couchdb|
 |SYSTEM_ID|the id to allow access to sensitive data with (probably `dummy:dummy.AnonymousUser` if testing locally)|
 
 
