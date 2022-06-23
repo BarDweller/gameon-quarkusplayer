@@ -55,7 +55,7 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-resteasy-jsonb</artifactId>
+      <artifactId>quarkus-rest-client-jackson</artifactId>
     </dependency>
     <dependency>
         <groupId>io.quarkus</groupId>
@@ -64,7 +64,15 @@
     <dependency>
         <groupId>io.quarkus</groupId>
         <artifactId>quarkus-smallrye-fault-tolerance</artifactId>
-    </dependency>        
+    </dependency>
+    <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-smallrye-jwt</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-smallrye-jwt-build</artifactId>
+    </dependency>            
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-reactive-messaging</artifactId>
@@ -100,17 +108,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>    
-    </dependency>      
-    <dependency>
-      <groupId>io.jsonwebtoken</groupId>
-      <artifactId>jjwt-api</artifactId>
-      <version>0.10.8</version>
-    </dependency>
-    <dependency>
-      <groupId>io.jsonwebtoken</groupId>
-      <artifactId>jjwt-impl</artifactId>
-      <version>0.10.8</version>
-    </dependency>    
+    </dependency>        
     <dependency>
       <groupId>io.swagger</groupId>
       <artifactId>swagger-annotations</artifactId>
@@ -120,12 +118,7 @@
       <groupId>org.ektorp</groupId>
       <artifactId>org.ektorp</artifactId>
       <version>1.5.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.github.gameontext</groupId>
-      <artifactId>signed</artifactId>
-      <version>v1.0.4</version>
-    </dependency>     
+    </dependency>    
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-junit5</artifactId>

@@ -1,47 +1,31 @@
-/*******************************************************************************
- * Copyright (c) 2016 IBM Corp.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *******************************************************************************/
 package org.gameontext.player.utils;
 
-import java.security.Key;
+import java.security.PublicKey;
 import java.security.cert.Certificate;
+import java.util.Set;
 import java.util.logging.Level;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
+import io.smallrye.jwt.auth.principal.JWTAuthContextInfo;
+import io.smallrye.jwt.auth.principal.JWTCallerPrincipal;
+import io.smallrye.jwt.auth.principal.JWTCallerPrincipalFactory;
+import io.smallrye.jwt.auth.principal.ParseException;
+
 
 /**
  * Common class for handling JSON Web Tokens
- *
- * @author marknsweep
- *
  */
 
 public class JWT {
     private final AuthenticationState state;
     private FailureCode code;
     private String token = null;
-    private Jws<Claims> jwt = null;
+    private JWTCallerPrincipal jwtcp = null;
 
     public JWT(Certificate cert, String... sources) {
         state = processSources(cert.getPublicKey(), sources);
     }
 
-    public JWT(Key key, String... sources) {
+    public JWT(PublicKey key, String... sources) {
         state = processSources(key, sources);
     }
 
@@ -62,8 +46,7 @@ public class JWT {
         COMPLETE
     }
 
-    @SuppressWarnings("deprecation")
-    private AuthenticationState processSources(Key key, String[] sources) {
+    private AuthenticationState processSources(PublicKey key, String[] sources) {
         AuthenticationState state = AuthenticationState.ACCESS_DENIED; // default
         ProcessState process = ProcessState.FIND_SOURCE;
         while (!process.equals(ProcessState.COMPLETE)) {
@@ -76,16 +59,18 @@ public class JWT {
             case VALIDATE: // validate the jwt
                 boolean jwtValid = false;
                 try {
-                    jwt = Jwts.parser().setSigningKey(key).parseClaimsJws(token);
+                    JWTAuthContextInfo ctx = new JWTAuthContextInfo(key, "test");
+                    ctx.setIssuedBy(null);
+                    ctx.setRequiredClaims(Set.of("sub","aud","name","id","exp","iat"));
+                    ctx.setExpGracePeriodSecs(60);
+                    JWTCallerPrincipalFactory factory = JWTCallerPrincipalFactory.instance();
+                    jwtcp = factory.parse(token, ctx);
                     jwtValid = true;
                     code = FailureCode.NONE;
-                } catch (io.jsonwebtoken.SignatureException e) {
+                } catch (ParseException e) {
                     Log.log(Level.WARNING, this, "JWT did NOT validate ok, bad signature.");
                     code = FailureCode.BAD_SIGNATURE;
-                } catch (ExpiredJwtException e) {
-                    Log.log(Level.WARNING, this, "JWT did NOT validate ok, jwt had expired");
-                    code = FailureCode.EXPIRED;
-                }
+                } 
                 state = !jwtValid ? AuthenticationState.ACCESS_DENIED : AuthenticationState.PASSED;
                 process = ProcessState.COMPLETE;
                 break;
@@ -109,8 +94,8 @@ public class JWT {
         return token;
     }
 
-    public Claims getClaims() {
-        return jwt.getBody();
+    public Object getClaim(String key) {
+        return jwtcp.getClaim(key);
     }
 
 

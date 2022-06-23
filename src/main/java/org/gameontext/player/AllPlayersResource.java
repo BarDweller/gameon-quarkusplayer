@@ -45,8 +45,6 @@ import org.gameontext.player.entity.PlayerDbRecord;
 import org.gameontext.player.entity.PlayerResponse;
 import org.gameontext.player.utils.SharedSecretGenerator;
 
-import io.jsonwebtoken.Claims;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -175,18 +173,17 @@ public class AllPlayersResource {
         PlayerDbRecord pFull = new PlayerDbRecord();
         pFull.update(player);   // get all proposed updates
         
-        Claims claims = (Claims) httpRequest.getAttribute("player.claims");
-
         // make sure an API key is generated for the new user
         pFull.setApiKey(SharedSecretGenerator.generateApiKey());
         
         //add in story/playerMode if they are present in the users auth jwt.
-        if (claims.containsKey("story")) {
-            pFull.setStory(claims.get("story", String.class));
+        if (httpRequest.getAttribute("player.story")!=null) {
+            pFull.setStory(httpRequest.getAttribute("player.story").toString());
         }
-        if (claims.containsKey("playerMode")) {
-            pFull.setPlayerMode(claims.get("playerMode", String.class));
-        }
+        if (httpRequest.getAttribute("player.playerMode")!=null) {
+            pFull.setPlayerMode(httpRequest.getAttribute("player.playerMode").toString());
+        }        
+
         // NOTE: Thrown exceptions are mapped (see ErrorResponseMapper)
         db.create(pFull);
 

@@ -21,7 +21,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.Enumeration;
-import java.util.Map;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -33,22 +32,23 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.gameontext.player.utils.JWT;
 import org.gameontext.player.utils.JWT.AuthenticationState;
 
-@WebFilter(filterName = "playerJWTAuthFilter", urlPatterns = { "/v1/*" })
+@WebFilter(filterName = "playerJWTAuthFilter", urlPatterns = { "/*" })
 public class PlayerFilter implements Filter {
 
-    @ConfigProperty (name = "JWT_PUBLIC_CERT", defaultValue = "x")
     String pemCert;
 
     private static Certificate signingCert = null;
 
     private synchronized void readCert() throws IOException {
         try {
-            System.out.println("key");
-            System.out.println(pemCert);
+
+            if(null==pemCert || pemCert.equals("x")){
+                pemCert = ConfigProvider.getConfig().getValue("JWT_PUBLIC_CERT", String.class);
+            }
             CertificateFactory factory = CertificateFactory.getInstance("X.509");
             signingCert = factory.generateCertificate(new ByteArrayInputStream(pemCert.getBytes()));
         } catch (CertificateException e) {
@@ -67,12 +67,15 @@ public class PlayerFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+
         if(signingCert==null){
             readCert();
         }
 
-        String playerId = null;
-        Map<String, Object> claims = null;
+        Object playerId = null;
+        Object story = null;
+        Object playerMode = null;
+        Object audience = null;
 
         HttpServletRequest req = ((HttpServletRequest) request);
         String jwtHeader = null;
@@ -113,11 +116,16 @@ public class PlayerFilter implements Filter {
                 return;
             }
         } else {
-            claims = jwt.getClaims();
-            playerId = jwt.getClaims().getSubject();
+            playerId = jwt.getClaim("sub");
+            story = jwt.getClaim("story");
+            playerMode = jwt.getClaim("playerMode");
+            audience = jwt.getClaim("aud");
         }
+    
         request.setAttribute("player.id", playerId);
-        request.setAttribute("player.claims", claims);
+        if(story!=null) request.setAttribute("player.story", story);
+        request.setAttribute("player.playerMode", playerMode);
+        request.setAttribute("player.audience", audience);
         chain.doFilter(request, response);
     }
 

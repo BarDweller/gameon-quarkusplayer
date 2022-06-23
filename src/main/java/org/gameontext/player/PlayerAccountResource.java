@@ -45,7 +45,6 @@ import org.gameontext.player.entity.PlayerResponse;
 import org.gameontext.player.utils.Log;
 import org.gameontext.player.utils.SharedSecretGenerator;
 
-import io.jsonwebtoken.Claims;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -154,8 +153,7 @@ public class PlayerAccountResource {
 
         PlayerDbRecord fullPlayer = db.get(PlayerDbRecord.class, newPlayer.getId());
 
-        Claims claims = (Claims) httpRequest.getAttribute("player.claims");
-        if ( !claims.getAudience().equals("server")) {
+        if ( httpRequest.getAttribute("player.audience")==null && !httpRequest.getAttribute("player.audience").equals("server")) {
             // Check the "audience" to determine which fields can be updated
             // If it is not a server, but it is the matching player,
             // we allow the user profile to be updated.
@@ -239,12 +237,11 @@ public class PlayerAccountResource {
     public Response updatePlayerLocation(@PathParam("id") String id, LocationChange update,
     @Context HttpServletRequest httpRequest) throws IOException {
         // we don't want to allow this method to be invoked by a user.
-        Claims claims = (Claims) httpRequest.getAttribute("player.claims");
-        if ( !claims.getAudience().equals("server")) {
+        if ( httpRequest.getAttribute("player.audience")==null && !httpRequest.getAttribute("player.audience").equals("server")) {
             throw new PlayerAccountModificationException(
                     Response.Status.FORBIDDEN,
                     "Unable to update player location",
-                    "Invalid token type " + claims.getAudience());
+                    "Invalid token type " + httpRequest.getAttribute("player.audience"));
         }
 
         PlayerDbRecord p = db.get(PlayerDbRecord.class, id);  // throws DocumentNotFoundException
@@ -374,12 +371,11 @@ public class PlayerAccountResource {
         String authId = (String) httpRequest.getAttribute("player.id");
 
         // we don't want to allow this method to be invoked by the server (must be at user's request).
-        Claims claims = (Claims) httpRequest.getAttribute("player.claims");
-        if ( claims.getAudience().equals("server")) {
+        if ( httpRequest.getAttribute("player.audience")==null && !httpRequest.getAttribute("player.audience").equals("server")) {
             throw new PlayerAccountModificationException(
                     Response.Status.FORBIDDEN,
                     "Unable to update player apikey",
-                    "Invalid token type " + claims.getAudience());
+                    "Invalid token type " + httpRequest.getAttribute("player.audience"));
         }
 
         if (unauthorizedId(authId, id)) {
