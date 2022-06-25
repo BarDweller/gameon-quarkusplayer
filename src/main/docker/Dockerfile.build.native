@@ -6,8 +6,11 @@ ENV fish=123
 COPY --chown=quarkus:quarkus mvnw /code/mvnw
 COPY --chown=quarkus:quarkus .mvn /code/.mvn
 COPY --chown=quarkus:quarkus pom.xml /code/
+RUN chmod +x /code/mvnw
 USER quarkus
 WORKDIR /code
+RUN ls -al .
+RUN whoami
 RUN ./mvnw -B org.apache.maven.plugins:maven-dependency-plugin:3.1.2:go-offline
 COPY src /code/src
 RUN ./mvnw package -Pnative
