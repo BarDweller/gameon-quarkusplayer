@@ -1,5 +1,10 @@
 # Gameon Quarkus Player
 
+![Publish](https://github.com/bardweller/gameon-quarkusplayer/actions/workflows/main.yml/badge.svg)
+![ReleaseDate](https://img.shields.io/github/release-date/bardweller/gameon-quarkusplayer)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/bardweller/gameon-quarkusplayer?display_name=release)
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/bardweller/gameon-quarkusplayer)
+
 A recreation of the GameOn Player service using Quarkus, rather than JEE.
 
 # Build instructions. 
