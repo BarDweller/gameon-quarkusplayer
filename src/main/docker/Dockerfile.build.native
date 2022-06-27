@@ -1,17 +1,24 @@
 ## Stage 1 : build with maven builder image with native capabilities
 FROM quay.io/quarkus/ubi-quarkus-native-image:22.1-java11 AS build
 
-ENV fish=123
-
 COPY --chown=quarkus:quarkus mvnw /code/mvnw
 COPY --chown=quarkus:quarkus .mvn /code/.mvn
 COPY --chown=quarkus:quarkus pom.xml /code/
+
+#Ensure mvnw is executable!
 RUN chmod +x /code/mvnw
+
 USER quarkus
 WORKDIR /code
+
+#Verify dir content/perms
 RUN ls -al .
 RUN whoami
-RUN ./mvnw -B org.apache.maven.plugins:maven-dependency-plugin:3.1.2:go-offline
+
+#Launch maven to go get dependencies etc.. (seperate step to enable caching)
+RUN ./mvnw -B org.apache.maven.plugins:maven-dependency-plugin:3.3.0:go-offline
+
+#Bring in the source, and build it (native app, doable as we're using ubi-quarkus-native-image as our base)
 COPY src /code/src
 RUN ./mvnw package -Pnative
 
