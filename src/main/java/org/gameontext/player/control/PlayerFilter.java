@@ -33,8 +33,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.microprofile.config.ConfigProvider;
-import org.gameontext.player.utils.JWT;
-import org.gameontext.player.utils.JWT.AuthenticationState;
+import org.gameontext.signed.SignedJWT;
+import org.gameontext.signed.SignedJWT.AuthenticationState;
 
 @WebFilter(filterName = "playerJWTAuthFilter", urlPatterns = { "/*" })
 public class PlayerFilter implements Filter {
@@ -104,7 +104,7 @@ public class PlayerFilter implements Filter {
             }
         }
         
-        JWT jwt = new JWT(signingCert, jwtHeader, jwtParam);
+        SignedJWT jwt = new SignedJWT(signingCert, jwtHeader, jwtParam);
         
         if(jwt.getState().equals(AuthenticationState.ACCESS_DENIED)) {
             String ctxPath = req.getContextPath();
