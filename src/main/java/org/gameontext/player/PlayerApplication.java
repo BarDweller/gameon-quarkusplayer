@@ -23,7 +23,7 @@ import javax.ws.rs.core.Application;
                 title = "Game On! Player API",
                 version = "1.0"
                 ))
-@ApplicationPath("/players/v1/")
+@ApplicationPath("/v1/")
 public class PlayerApplication extends Application {
     public static String FIRST_ROOM="firstroom";
 }
